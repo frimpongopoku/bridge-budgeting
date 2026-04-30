@@ -21,9 +21,9 @@ const fadeUp = {
 
 const statCards = [
   { label: "Cycles Completed", value: totalReconciled.toString(), icon: CheckCircle2, color: "#34D399", bg: "rgba(52,211,153,0.08)", sub: "Since Jan 2026" },
-  { label: "Total Borrowed", value: `$${totalBorrowedAllTime.toLocaleString()}`, icon: TrendingDown, color: "#E8A838", bg: "rgba(232,168,56,0.08)", sub: "All time from EF" },
-  { label: "Avg per Cycle", value: `$${avgBorrowed.toLocaleString()}`, icon: BarChart3, color: "#C8A84B", bg: "rgba(200,168,75,0.08)", sub: "Borrowed on average" },
-  { label: "EF Net Growth", value: `+$${totalEFGain.toLocaleString()}`, icon: TrendingUp, color: "#A78BFA", bg: "rgba(167,139,250,0.08)", sub: "From income allocations" },
+  { label: "Total Borrowed", value: `₵${totalBorrowedAllTime.toLocaleString()}`, icon: TrendingDown, color: "#E8A838", bg: "rgba(232,168,56,0.08)", sub: "All time from EF" },
+  { label: "Avg per Cycle", value: `₵${avgBorrowed.toLocaleString()}`, icon: BarChart3, color: "#C8A84B", bg: "rgba(200,168,75,0.08)", sub: "Borrowed on average" },
+  { label: "EF Net Growth", value: `+₵${totalEFGain.toLocaleString()}`, icon: TrendingUp, color: "#A78BFA", bg: "rgba(167,139,250,0.08)", sub: "From income allocations" },
 ];
 
 export default function HistoryPage() {
@@ -97,7 +97,7 @@ export default function HistoryPage() {
             return (
               <div key={cycle.id} className="flex-1 flex flex-col items-center gap-2">
                 <span className="text-xs font-semibold" style={{ color: "#C8A84B" }}>
-                  ${cycle.totalBorrowed.toLocaleString()}
+                  ₵{cycle.totalBorrowed.toLocaleString()}
                 </span>
                 <div className="w-full rounded-xl overflow-hidden h-24" style={{ background: "#131320" }}>
                   <div className="w-full h-full flex items-end">
@@ -163,8 +163,8 @@ export default function HistoryPage() {
                         />
                       </div>
                       <div className="flex justify-between text-xs" style={{ color: "#706E88" }}>
-                        <span>${cycle.totalBorrowed.toLocaleString()} borrowed ({pct.toFixed(0)}%)</span>
-                        <span>Income: ${cycle.expectedIncome.toLocaleString()}</span>
+                        <span> ₵{cycle.totalBorrowed.toLocaleString()} borrowed ({pct.toFixed(0)}%)</span>
+                        <span>Income: ₵{cycle.expectedIncome.toLocaleString()}</span>
                       </div>
                     </div>
 

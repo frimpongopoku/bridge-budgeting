@@ -20,7 +20,7 @@ const borrowedPercent = (totalBorrowed / mockCycle.expectedIncome) * 100;
 const statCards = [
   {
     label: "Expected Income",
-    value: `$${mockCycle.expectedIncome.toLocaleString()}`,
+    value: `₵${mockCycle.expectedIncome.toLocaleString()}`,
     icon: TrendingUp,
     color: "#C8A84B",
     bg: "rgba(200,168,75,0.08)",
@@ -28,7 +28,7 @@ const statCards = [
   },
   {
     label: "Total Borrowed",
-    value: `$${totalBorrowed.toLocaleString()}`,
+    value: `₵${totalBorrowed.toLocaleString()}`,
     icon: ArrowDownCircle,
     color: "#E8A838",
     bg: "rgba(232,168,56,0.08)",
@@ -36,15 +36,15 @@ const statCards = [
   },
   {
     label: "Emergency Fund",
-    value: `$${mockEmergencyFund.balance.toLocaleString()}`,
+    value: `₵${mockEmergencyFund.balance.toLocaleString()}`,
     icon: Shield,
     color: "#34D399",
     bg: "rgba(52,211,153,0.08)",
-    sub: `$${mockEmergencyFund.remainingBalance.toLocaleString()} remaining`,
+    sub: `₵${mockEmergencyFund.remainingBalance.toLocaleString()} remaining`,
   },
   {
     label: "Net Available",
-    value: `$${available.toLocaleString()}`,
+    value: `₵${available.toLocaleString()}`,
     icon: Wallet,
     color: "#A78BFA",
     bg: "rgba(167,139,250,0.08)",
@@ -136,17 +136,17 @@ export default function DashboardPage() {
                     {mockCycle.name}
                   </h2>
                   <p className="text-sm" style={{ color: "#8A88A0" }}>
-                    Expected income: ${mockCycle.expectedIncome.toLocaleString()}
+                    Expected income: ₵{mockCycle.expectedIncome.toLocaleString()}
                   </p>
                 </div>
 
                 <div className="text-right">
                   <p className="text-xs mb-1" style={{ color: "#8A88A0" }}>Borrowed so far</p>
                   <p className="text-4xl font-bold" style={{ color: "#C8A84B" }}>
-                    ${totalBorrowed.toLocaleString()}
+                    ₵{totalBorrowed.toLocaleString()}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: "#8A88A0" }}>
-                    of ${mockCycle.expectedIncome.toLocaleString()}
+                    of ₵{mockCycle.expectedIncome.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -258,9 +258,9 @@ export default function DashboardPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-bold" style={{ color: isOver ? "#F87171" : "#EBE5D0" }}>
-                          ${cat.borrowed.toLocaleString()}
+                          ₵{cat.borrowed.toLocaleString()}
                           <span className="text-xs font-normal ml-1" style={{ color: "#706E88" }}>
-                            / ${allocated.toLocaleString()}
+                            / ₵{allocated.toLocaleString()}
                           </span>
                         </p>
                       </div>
@@ -276,7 +276,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex justify-between mt-2">
                       <span className="text-xs" style={{ color: "#706E88" }}>
-                        ${(allocated - cat.borrowed).toLocaleString()} remaining
+                        ₵{(allocated - cat.borrowed).toLocaleString()} remaining
                       </span>
                       <span className="text-xs font-medium" style={{ color: barColor }}>
                         {pct.toFixed(0)}%
@@ -327,7 +327,7 @@ export default function DashboardPage() {
                     <p className="text-xs" style={{ color: "#706E88" }}>{w.date}</p>
                   </div>
                   <span className="text-sm font-semibold shrink-0" style={{ color: "#E8A838" }}>
-                    –${w.amount.toLocaleString()}
+                    –₵{w.amount.toLocaleString()}
                   </span>
                 </motion.div>
               ))}

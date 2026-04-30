@@ -61,7 +61,7 @@ export default function CyclePage() {
               </span>
             </div>
             <p className="text-sm mt-0.5" style={{ color: "#8A88A0" }}>
-              Expected income: ${mockCycle.expectedIncome.toLocaleString()} · Started Apr 1, 2026
+              Expected income: ₵{mockCycle.expectedIncome.toLocaleString()} · Started Apr 1, 2026
             </p>
           </div>
         </div>
@@ -98,10 +98,10 @@ export default function CyclePage() {
         className="grid grid-cols-4 gap-4"
       >
         {[
-          { label: "Expected Income", value: `$${mockCycle.expectedIncome.toLocaleString()}`, color: "#EBE5D0" },
-          { label: "Total Borrowed", value: `$${totalBorrowed.toLocaleString()}`, color: "#E8A838" },
-          { label: "EF After Borrowing", value: `$${mockEmergencyFund.remainingBalance.toLocaleString()}`, color: "#34D399" },
-          { label: "EF Replenishment", value: `$${efAllocation.toLocaleString()}`, color: "#C8A84B" },
+          { label: "Expected Income", value: `₵${mockCycle.expectedIncome.toLocaleString()}`, color: "#EBE5D0" },
+          { label: "Total Borrowed", value: `₵${totalBorrowed.toLocaleString()}`, color: "#E8A838" },
+          { label: "EF After Borrowing", value: `₵${mockEmergencyFund.remainingBalance.toLocaleString()}`, color: "#34D399" },
+          { label: "EF Replenishment", value: `₵${efAllocation.toLocaleString()}`, color: "#C8A84B" },
         ].map((s) => (
           <div
             key={s.label}
@@ -156,7 +156,7 @@ export default function CyclePage() {
                       <div>
                         <p className="text-sm font-semibold" style={{ color: "#C5C0D0" }}>{cat.name}</p>
                         <p className="text-xs mt-0.5" style={{ color: "#706E88" }}>
-                          {cat.allocationValue}% · ${allocated.toLocaleString()} allocated
+                          {cat.allocationValue}% · ₵{allocated.toLocaleString()} allocated
                         </p>
                       </div>
                     </div>
@@ -190,7 +190,7 @@ export default function CyclePage() {
                   </div>
                   <div className="flex justify-between mt-2 text-xs">
                     <span style={{ color: "#8A88A0" }}>
-                      Borrowed: <span className="font-semibold" style={{ color: "#C5C0D0" }}>${cat.borrowed.toLocaleString()}</span>
+                      Borrowed: <span className="font-semibold" style={{ color: "#C5C0D0" }}> ₵{cat.borrowed.toLocaleString()}</span>
                     </span>
                     <span className="font-semibold" style={{ color: remaining < 0 ? "#F87171" : "#34D399" }}>
                       {remaining < 0 ? "–" : "+"}${Math.abs(remaining).toLocaleString()} {remaining < 0 ? "over" : "left"}
@@ -223,7 +223,7 @@ export default function CyclePage() {
                 <div>
                   <p className="text-sm font-semibold" style={{ color: "#C5C0D0" }}>Emergency Fund Replenishment</p>
                   <p className="text-xs mt-0.5" style={{ color: "#8A88A0" }}>
-                    {mockCycle.emergencyFundAllocation}% of income · ${efAllocation.toLocaleString()} allocated on reconciliation
+                    {mockCycle.emergencyFundAllocation}% of income · ₵{efAllocation.toLocaleString()} allocated on reconciliation
                   </p>
                 </div>
               </div>
@@ -254,7 +254,7 @@ export default function CyclePage() {
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium"
                   style={{ color: "#8A88A0" }}
                 >
-                  $
+                  ₵
                 </span>
                 <input
                   type="number"
@@ -327,7 +327,7 @@ export default function CyclePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold" style={{ color: "#E8A838" }}>
-                      –${w.amount.toLocaleString()}
+                      –₵{w.amount.toLocaleString()}
                     </span>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
@@ -353,7 +353,7 @@ export default function CyclePage() {
               style={{ background: "#0E0E1C", border: "1px solid #1A1A2C" }}
             >
               <span className="text-sm font-medium" style={{ color: "#8A88A0" }}>Total borrowed this cycle</span>
-              <span className="text-base font-bold" style={{ color: "#E8A838" }}>–${totalBorrowed.toLocaleString()}</span>
+              <span className="text-base font-bold" style={{ color: "#E8A838" }}>–₵{totalBorrowed.toLocaleString()}</span>
             </div>
           </div>
         </motion.div>

@@ -74,7 +74,7 @@ export function NewCycleModal({ onClose }: Props) {
               <div className="space-y-2">
                 <label className="text-xs font-medium" style={{ color: "#6E6C82" }}>Expected income</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium" style={{ color: "#6E6C82" }}>$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium" style={{ color: "#6E6C82" }}>₵</span>
                   <input
                     type="number"
                     value={expectedIncome}
@@ -181,7 +181,7 @@ export function NewCycleModal({ onClose }: Props) {
                                     {cat.allocationValue}%
                                   </span>
                                   <span className="text-xs font-semibold" style={{ color: "#C8A84B" }}>
-                                    ${allocated.toLocaleString()}
+                                    ₵{allocated.toLocaleString()}
                                   </span>
                                 </div>
                               </div>

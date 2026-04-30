@@ -112,10 +112,10 @@ export function Sidebar() {
           </div>
           <div>
             <p className="text-xl font-bold" style={{ color: "#EBE5D0" }}>
-              ${mockEmergencyFund.balance.toLocaleString()}
+              ₵{mockEmergencyFund.balance.toLocaleString()}
             </p>
             <p className="text-xs mt-0.5" style={{ color: "#8A88A0" }}>
-              ${mockEmergencyFund.remainingBalance.toLocaleString()} after borrowing
+              ₵{mockEmergencyFund.remainingBalance.toLocaleString()} after borrowing
             </p>
           </div>
           <div className="space-y-1.5">
@@ -131,7 +131,7 @@ export function Sidebar() {
             <div className="flex justify-between text-xs">
               <span style={{ color: "#8A88A0" }}>Borrowed</span>
               <span className="font-medium" style={{ color: "#C8A84B" }}>
-                –${mockEmergencyFund.totalBorrowed.toLocaleString()}
+                –₵{mockEmergencyFund.totalBorrowed.toLocaleString()}
               </span>
             </div>
           </div>
