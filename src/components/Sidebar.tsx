@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, RefreshCw, Clock, LogOut, Shield, TrendingUp } from "lucide-react";
-import { mockUser, mockEmergencyFund } from "@/lib/mock-data";
+import { mockEmergencyFund } from "@/lib/mock-data";
+import { useAuth } from "@/context/AuthContext";
+import { signOut } from "@/lib/auth";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -13,6 +15,18 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const displayName = user?.displayName ?? "User";
+  const email = user?.email ?? "";
+  const photoURL = user?.photoURL ?? null;
+  const initials = displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+
+  async function handleSignOut() {
+    await signOut();
+    router.replace("/login");
+  }
 
   return (
     <aside className="w-60 h-full flex flex-col shrink-0" style={{ background: "#06060C", borderRight: "1px solid #13132A" }}>
@@ -128,20 +142,31 @@ export function Sidebar() {
       <div className="px-4 pb-6" style={{ borderTop: "1px solid #13132A", paddingTop: "16px" }}>
         <div className="flex items-center gap-3 cursor-pointer group mt-1">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-            style={{ background: "linear-gradient(135deg, #C8A84B 0%, #8B6520 100%)", color: "#000" }}
+            className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold shrink-0"
+            style={
+              photoURL
+                ? undefined
+                : { background: "linear-gradient(135deg, #C8A84B 0%, #8B6520 100%)", color: "#000" }
+            }
           >
-            {mockUser.avatar}
+            {photoURL ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={photoURL} alt={displayName} className="w-full h-full object-cover" />
+            ) : (
+              initials
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate" style={{ color: "#C5C0D0" }}>
-              {mockUser.name}
+              {displayName}
             </p>
             <p className="text-xs truncate" style={{ color: "#706E88" }}>
-              {mockUser.email}
+              {email}
             </p>
           </div>
-          <LogOut className="w-4 h-4 shrink-0 transition-colors" style={{ color: "#706E88" }} />
+          <button onClick={handleSignOut} title="Sign out">
+            <LogOut className="w-4 h-4 shrink-0 transition-colors hover:text-red-400" style={{ color: "#706E88" }} />
+          </button>
         </div>
       </div>
     </aside>
