@@ -5,18 +5,21 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useEmergencyFund } from "@/hooks/useEmergencyFund";
+import { EmergencyFundSetup } from "@/components/EmergencyFundSetup";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { balance, loading: efLoading } = useEmergencyFund(user?.uid);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       router.replace("/login");
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
-  if (loading) {
+  if (authLoading || (user && efLoading)) {
     return (
       <div
         className="h-full flex items-center justify-center"
@@ -48,6 +51,10 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) return null;
+
+  if (balance === null) {
+    return <EmergencyFundSetup userId={user.uid} />;
+  }
 
   return <>{children}</>;
 }
