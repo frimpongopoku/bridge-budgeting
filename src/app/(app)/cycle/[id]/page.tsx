@@ -27,6 +27,7 @@ import {
 import { AddCategoryModal } from "@/components/AddCategoryModal";
 import { deleteCategory } from "@/lib/firestore";
 import { Category } from "@/types";
+import { CyclePDFExportButton } from "@/components/CyclePDFExport";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
@@ -419,12 +420,20 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
           )}
 
           {isReconciled && (
-            <div
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium"
-              style={{ background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.15)", color: "#34D399" }}
-            >
-              <Lock className="w-4 h-4" />
-              Read-only
+            <div className="flex items-center gap-3">
+              <CyclePDFExportButton
+                cycle={cycle}
+                categories={categories}
+                withdrawals={withdrawals}
+                efBalance={balance ?? 0}
+              />
+              <div
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium"
+                style={{ background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.15)", color: "#34D399" }}
+              >
+                <Lock className="w-4 h-4" />
+                Read-only
+              </div>
             </div>
           )}
         </motion.div>
