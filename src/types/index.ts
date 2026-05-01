@@ -9,6 +9,7 @@ export interface Cycle {
   emergencyFundAllocationValue: number;
   createdAt: Timestamp;
   reconciledAt?: Timestamp;
+  reconciledEFBalance?: number;
 }
 
 export interface Category {

@@ -181,7 +181,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
     setReconcileError("");
     setReconciling(true);
     try {
-      await reconcileCycle(user.uid, cycle.id, totalBorrowed, efAllocationAmount);
+      await reconcileCycle(user.uid, cycle.id, totalBorrowed, efAllocationAmount, balance ?? 0);
       router.push("/history");
     } catch (err) {
       console.error(err);
@@ -470,7 +470,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
             </motion.div>
           ))}
 
-          {/* Projected EF after reconciliation */}
+          {/* EF balance — snapshot when reconciled, projection when active */}
           <motion.div
             whileHover={{ y: -1 }}
             className="rounded-2xl p-4 relative overflow-hidden"
@@ -484,14 +484,15 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
               style={{ background: "radial-gradient(circle, rgba(52,211,153,0.12) 0%, transparent 70%)" }}
             />
             <p className="text-xs font-medium mb-1" style={{ color: "rgba(52,211,153,0.6)" }}>
-              After Reconciliation
+              {isReconciled ? "Reconciled EF Balance" : "After Reconciliation"}
             </p>
             <p className="text-xl font-bold" style={{ color: "#34D399" }}>
-              ₵{projectedEF.toLocaleString()}
+              ₵{(isReconciled ? (cycle.reconciledEFBalance ?? projectedEF) : projectedEF).toLocaleString()}
             </p>
             <p className="text-xs mt-1" style={{ color: "rgba(52,211,153,0.45)" }}>
-              {balance !== null ? `₵${balance.toLocaleString()} now` : "–"} +{" "}
-              ₵{totalBorrowed.toLocaleString()} returned + ₵{efAllocationAmount.toLocaleString()} ({efLabel})
+              {isReconciled
+                ? "Balance at time of reconciliation"
+                : `${balance !== null ? `₵${balance.toLocaleString()} now` : "–"} + ₵${totalBorrowed.toLocaleString()} returned + ₵${efAllocationAmount.toLocaleString()} (${efLabel})`}
             </p>
           </motion.div>
         </motion.div>

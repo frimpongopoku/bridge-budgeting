@@ -225,14 +225,18 @@ export async function reconcileCycle(
   userId: string,
   cycleId: string,
   totalBorrowed: number,
-  efAllocationAmount: number
+  efAllocationAmount: number,
+  currentEFBalance: number
 ): Promise<void> {
   const batch = writeBatch(db);
+
+  const reconciledEFBalance = currentEFBalance + totalBorrowed + efAllocationAmount;
 
   const cycleRef = doc(db, "users", userId, "cycles", cycleId);
   batch.update(cycleRef, {
     status: "reconciled",
     reconciledAt: serverTimestamp(),
+    reconciledEFBalance,
   });
 
   const userRef = doc(db, "users", userId);
