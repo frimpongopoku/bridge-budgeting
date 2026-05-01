@@ -12,7 +12,7 @@ const fadeUp = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.38, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.38, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
   }),
 };
 
@@ -270,7 +270,7 @@ export default function HistoryPage() {
                         transition={{
                           duration: 0.8,
                           delay: 0.3 + i * 0.1,
-                          ease: [0.16, 1, 0.3, 1],
+                          ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
                         }}
                         className="w-full rounded-xl"
                         style={{
@@ -362,7 +362,7 @@ export default function HistoryPage() {
                           transition={{
                             duration: 0.7,
                             delay: 0.2 + i * 0.08,
-                            ease: [0.16, 1, 0.3, 1],
+                            ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
                           }}
                           className="h-full rounded-full"
                           style={{

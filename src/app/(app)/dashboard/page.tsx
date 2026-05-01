@@ -21,7 +21,7 @@ import { calcAllocated } from "@/lib/firestore";
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
 };
 
 function SkeletonBlock({ className = "" }: { className?: string }) {
@@ -265,7 +265,7 @@ export default function DashboardPage() {
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min(borrowedPercent, 100)}%` }}
-                        transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
                         className="h-full rounded-full"
                         style={{
                           background:
@@ -467,7 +467,7 @@ export default function DashboardPage() {
                               transition={{
                                 duration: 0.8,
                                 delay: 0.4 + i * 0.08,
-                                ease: [0.16, 1, 0.3, 1],
+                                ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
                               }}
                               className="h-full rounded-full"
                               style={{ background: barColor }}

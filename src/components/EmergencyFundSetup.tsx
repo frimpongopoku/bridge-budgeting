@@ -47,7 +47,7 @@ export function EmergencyFundSetup({ userId }: Props) {
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
           className="relative w-full max-w-md rounded-3xl overflow-hidden"
           style={{ background: "#0E0E1C", border: "1px solid #1E1E32" }}
         >

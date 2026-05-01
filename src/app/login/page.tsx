@@ -55,7 +55,7 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
         className="relative w-full max-w-sm"
       >
         <div
@@ -67,7 +67,7 @@ export default function LoginPage() {
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
               className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center"
               style={{
                 background: "linear-gradient(135deg, #C8A84B 0%, #7A5E1C 100%)",
