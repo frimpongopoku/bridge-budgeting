@@ -62,11 +62,15 @@ export default function DashboardPage() {
   const available = cycle ? cycle.expectedIncome - totalBorrowed : 0;
   const borrowedPercent = cycle ? (totalBorrowed / cycle.expectedIncome) * 100 : 0;
 
+  const isCustomFund = cycle?.borrowSource === "customFund";
+  const fundName = isCustomFund ? (cycle?.customFundName ?? "Custom Fund") : "Emergency Fund";
+  const currentFundBalance = isCustomFund ? (cycle?.customFundBalance ?? 0) : (balance ?? 0);
+
   const efAllocationAmount = cycle
     ? calcAllocated(cycle.expectedIncome, cycle.emergencyFundAllocationType, cycle.emergencyFundAllocationValue)
     : 0;
-  const projectedEF = balance !== null && cycle
-    ? balance + totalBorrowed + efAllocationAmount
+  const projectedEF = cycle
+    ? currentFundBalance + totalBorrowed + efAllocationAmount
     : null;
 
   const statCards = [
@@ -347,11 +351,11 @@ export default function DashboardPage() {
                   <Shield style={{ width: 18, height: 18, color: "#34D399" }} />
                 </div>
                 <p className="text-xs font-medium" style={{ color: "#8A88A0" }}>
-                  Emergency Fund
+                  {fundName}
                 </p>
                 {/* Current balance */}
                 <p className="text-sm font-semibold mt-0.5" style={{ color: "#5A7A6A" }}>
-                  {balance !== null ? `₵${balance.toLocaleString()}` : "–"} now
+                  {cycle ? `₵${currentFundBalance.toLocaleString()}` : "–"} now
                 </p>
                 {/* Projected reconciled */}
                 <p className="text-2xl font-bold mt-1" style={{ color: "#34D399" }}>
@@ -587,7 +591,7 @@ export default function DashboardPage() {
                       Log a withdrawal
                     </p>
                     <p className="text-xs mt-0.5" style={{ color: "#706E88" }}>
-                      From your emergency fund
+                      From your {fundName.toLowerCase()}
                     </p>
                   </div>
                   <Link href={`/cycle/${cycle.id}`}>
