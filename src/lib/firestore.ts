@@ -57,18 +57,27 @@ export async function createCycle(
     expectedIncome: number;
     emergencyFundAllocationType: "percent" | "fixed";
     emergencyFundAllocationValue: number;
+    borrowSource?: "emergencyFund" | "customFund";
+    customFundName?: string;
+    customFundBalance?: number;
   },
   categoriesData?: Omit<Category, "id">[]
 ): Promise<string> {
   const cyclesRef = collection(db, "users", userId, "cycles");
-  const cycleDoc = await addDoc(cyclesRef, {
+  const cyclePayload: Record<string, unknown> = {
     name: data.name,
     expectedIncome: data.expectedIncome,
     emergencyFundAllocationType: data.emergencyFundAllocationType,
     emergencyFundAllocationValue: data.emergencyFundAllocationValue,
+    borrowSource: data.borrowSource ?? "emergencyFund",
     status: "active",
     createdAt: serverTimestamp(),
-  });
+  };
+  if (data.borrowSource === "customFund") {
+    cyclePayload.customFundName = data.customFundName ?? "";
+    cyclePayload.customFundBalance = data.customFundBalance ?? 0;
+  }
+  const cycleDoc = await addDoc(cyclesRef, cyclePayload);
 
   if (categoriesData && categoriesData.length > 0) {
     const batch = writeBatch(db);
@@ -172,7 +181,8 @@ export async function addWithdrawal(
     categoryName: string;
     categoryEmoji: string;
     note: string;
-  }
+  },
+  borrowSource: "emergencyFund" | "customFund" = "emergencyFund"
 ): Promise<void> {
   const batch = writeBatch(db);
 
@@ -188,8 +198,13 @@ export async function addWithdrawal(
     createdAt: serverTimestamp(),
   });
 
-  const userRef = doc(db, "users", userId);
-  batch.update(userRef, { emergencyFundBalance: increment(-data.amount) });
+  if (borrowSource === "customFund") {
+    const cycleRef = doc(db, "users", userId, "cycles", cycleId);
+    batch.update(cycleRef, { customFundBalance: increment(-data.amount) });
+  } else {
+    const userRef = doc(db, "users", userId);
+    batch.update(userRef, { emergencyFundBalance: increment(-data.amount) });
+  }
 
   await batch.commit();
 }
@@ -198,23 +213,21 @@ export async function deleteWithdrawal(
   userId: string,
   cycleId: string,
   withdrawalId: string,
-  amount: number
+  amount: number,
+  borrowSource: "emergencyFund" | "customFund" = "emergencyFund"
 ): Promise<void> {
   const batch = writeBatch(db);
 
-  const withdrawalRef = doc(
-    db,
-    "users",
-    userId,
-    "cycles",
-    cycleId,
-    "withdrawals",
-    withdrawalId
-  );
+  const withdrawalRef = doc(db, "users", userId, "cycles", cycleId, "withdrawals", withdrawalId);
   batch.delete(withdrawalRef);
 
-  const userRef = doc(db, "users", userId);
-  batch.update(userRef, { emergencyFundBalance: increment(amount) });
+  if (borrowSource === "customFund") {
+    const cycleRef = doc(db, "users", userId, "cycles", cycleId);
+    batch.update(cycleRef, { customFundBalance: increment(amount) });
+  } else {
+    const userRef = doc(db, "users", userId);
+    batch.update(userRef, { emergencyFundBalance: increment(amount) });
+  }
 
   await batch.commit();
 }
@@ -226,11 +239,13 @@ export async function reconcileCycle(
   cycleId: string,
   totalBorrowed: number,
   efAllocationAmount: number,
-  currentEFBalance: number
+  currentBalance: number,
+  borrowSource: "emergencyFund" | "customFund" = "emergencyFund"
 ): Promise<void> {
   const batch = writeBatch(db);
 
-  const reconciledEFBalance = currentEFBalance + totalBorrowed + efAllocationAmount;
+  const reconciledEFBalance = currentBalance + totalBorrowed + efAllocationAmount;
+  const replenishAmount = totalBorrowed + efAllocationAmount;
 
   const cycleRef = doc(db, "users", userId, "cycles", cycleId);
   batch.update(cycleRef, {
@@ -239,10 +254,12 @@ export async function reconcileCycle(
     reconciledEFBalance,
   });
 
-  const userRef = doc(db, "users", userId);
-  batch.update(userRef, {
-    emergencyFundBalance: increment(totalBorrowed + efAllocationAmount),
-  });
+  if (borrowSource === "customFund") {
+    batch.update(cycleRef, { customFundBalance: increment(replenishAmount) });
+  } else {
+    const userRef = doc(db, "users", userId);
+    batch.update(userRef, { emergencyFundBalance: increment(replenishAmount) });
+  }
 
   await batch.commit();
 }

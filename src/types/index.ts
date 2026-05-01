@@ -7,6 +7,9 @@ export interface Cycle {
   status: "active" | "reconciled";
   emergencyFundAllocationType: "percent" | "fixed";
   emergencyFundAllocationValue: number;
+  borrowSource?: "emergencyFund" | "customFund";
+  customFundName?: string;
+  customFundBalance?: number;
   createdAt: Timestamp;
   reconciledAt?: Timestamp;
   reconciledEFBalance?: number;

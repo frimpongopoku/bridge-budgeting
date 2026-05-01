@@ -85,7 +85,11 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
   const efAllocationAmount = cycle
     ? calcAllocated(cycle.expectedIncome, cycle.emergencyFundAllocationType, cycle.emergencyFundAllocationValue)
     : 0;
-  const projectedEF = (balance ?? 0) + totalBorrowed + efAllocationAmount;
+
+  const isCustomFund = cycle?.borrowSource === "customFund";
+  const fundName = isCustomFund ? (cycle?.customFundName ?? "Custom Fund") : "Emergency Fund";
+  const currentFundBalance = isCustomFund ? (cycle?.customFundBalance ?? 0) : (balance ?? 0);
+  const projectedEF = currentFundBalance + totalBorrowed + efAllocationAmount;
 
   const efLabel = cycle
     ? cycle.emergencyFundAllocationType === "percent"
@@ -141,7 +145,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
         categoryName: category.name,
         categoryEmoji: category.emoji,
         note: note.trim(),
-      });
+      }, cycle.borrowSource ?? "emergencyFund");
       setAmount("");
       setSelectedCategoryId("");
       setNote("");
@@ -157,7 +161,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
     if (!user || !cycle) return;
     setDeletingWithdrawalId(withdrawalId);
     try {
-      await deleteWithdrawal(user.uid, cycle.id, withdrawalId, amt);
+      await deleteWithdrawal(user.uid, cycle.id, withdrawalId, amt, cycle.borrowSource ?? "emergencyFund");
     } catch (err) {
       console.error(err);
     } finally {
@@ -182,7 +186,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
     setReconcileError("");
     setReconciling(true);
     try {
-      await reconcileCycle(user.uid, cycle.id, totalBorrowed, efAllocationAmount, balance ?? 0);
+      await reconcileCycle(user.uid, cycle.id, totalBorrowed, efAllocationAmount, currentFundBalance, cycle.borrowSource ?? "emergencyFund");
       router.push("/history");
     } catch (err) {
       console.error(err);
@@ -292,7 +296,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
                   <span style={{ color: "#34D399" }}>
                     ₵{(totalBorrowed + efAllocationAmount).toLocaleString()}
                   </span>{" "}
-                  to your emergency fund:
+                  to your {fundName.toLowerCase()}:
                 </p>
               </div>
               <div
@@ -311,9 +315,9 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
                   className="flex justify-between text-sm font-bold pt-2"
                   style={{ borderTop: "1px solid #1A1A2C" }}
                 >
-                  <span style={{ color: "#8A88A0" }}>New EF balance</span>
+                  <span style={{ color: "#8A88A0" }}>New {fundName} balance</span>
                   <span style={{ color: "#34D399" }}>
-                    ₵{((balance ?? 0) + totalBorrowed + efAllocationAmount).toLocaleString()}
+                    ₵{(currentFundBalance + totalBorrowed + efAllocationAmount).toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -457,8 +461,8 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
               color: "#E8A838",
             },
             {
-              label: "EF Balance",
-              value: balance !== null ? `₵${balance.toLocaleString()}` : "–",
+              label: isCustomFund ? `${fundName} Balance` : "EF Balance",
+              value: isCustomFund ? `₵${currentFundBalance.toLocaleString()}` : (balance !== null ? `₵${balance.toLocaleString()}` : "–"),
               color: "#34D399",
             },
           ].map((s) => (
@@ -501,7 +505,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
             <p className="text-xs mt-1" style={{ color: "rgba(52,211,153,0.45)" }}>
               {isReconciled
                 ? "Balance at time of reconciliation"
-                : `${balance !== null ? `₵${balance.toLocaleString()} now` : "–"} + ₵${totalBorrowed.toLocaleString()} returned + ₵${efAllocationAmount.toLocaleString()} (${efLabel})`}
+                : `₵${currentFundBalance.toLocaleString()} now + ₵${totalBorrowed.toLocaleString()} returned + ₵${efAllocationAmount.toLocaleString()} (${efLabel})`}
             </p>
           </motion.div>
         </motion.div>
@@ -697,7 +701,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
                   </div>
                   <div>
                     <p className="text-sm font-semibold" style={{ color: "#C5C0D0" }}>
-                      Emergency Fund Replenishment
+                      {fundName} Replenishment
                     </p>
                     <p className="text-xs mt-0.5" style={{ color: "#8A88A0" }}>
                       {efLabel} · ₵{efAllocationAmount.toLocaleString()} added on reconciliation
@@ -806,7 +810,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
                     Log a Withdrawal
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: "#706E88" }}>
-                    From emergency fund
+                    From {fundName.toLowerCase()}
                   </p>
                 </div>
 

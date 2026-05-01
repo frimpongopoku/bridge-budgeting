@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Check, ArrowRight, Sparkles, RotateCcw } from "lucide-react";
+import { X, Check, ArrowRight, Sparkles, RotateCcw, Shield, Wallet } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useCycles } from "@/hooks/useCycles";
@@ -28,6 +28,9 @@ export function NewCycleModal({ onClose }: Props) {
   const [efAllocationType, setEfAllocationType] = useState<"percent" | "fixed">("fixed");
   const [efValue, setEfValue] = useState("640");
   const [selectedCycleId, setSelectedCycleId] = useState<string | null>(null);
+  const [borrowSource, setBorrowSource] = useState<"emergencyFund" | "customFund">("emergencyFund");
+  const [customFundName, setCustomFundName] = useState("");
+  const [customFundInitialBalance, setCustomFundInitialBalance] = useState("0");
   const [copyMode, setCopyMode] = useState<"copy" | "fresh">("copy");
   const [previewCategories, setPreviewCategories] = useState<Category[]>([]);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -65,6 +68,11 @@ export function NewCycleModal({ onClose }: Props) {
     if (!expectedIncome || isNaN(income) || income <= 0) { setError("Enter a valid expected income."); return; }
     if (isNaN(ef) || ef < 0) { setError("Enter a valid EF allocation."); return; }
     if (efAllocationType === "percent" && ef > 100) { setError("Percentage must be 0–100."); return; }
+    if (borrowSource === "customFund") {
+      if (!customFundName.trim()) { setError("Please enter a name for your fund."); return; }
+      const cfBal = parseFloat(customFundInitialBalance);
+      if (isNaN(cfBal) || cfBal < 0) { setError("Enter a valid starting balance for your fund."); return; }
+    }
 
     setError("");
     setCreating(true);
@@ -87,6 +95,9 @@ export function NewCycleModal({ onClose }: Props) {
           expectedIncome: income,
           emergencyFundAllocationType: efAllocationType,
           emergencyFundAllocationValue: ef,
+          borrowSource,
+          customFundName: borrowSource === "customFund" ? customFundName.trim() : undefined,
+          customFundBalance: borrowSource === "customFund" ? parseFloat(customFundInitialBalance) : undefined,
         },
         categoriesToCopy
       );
@@ -107,6 +118,7 @@ export function NewCycleModal({ onClose }: Props) {
     <AnimatePresence>
       {/* Backdrop */}
       <motion.div
+        key="backdrop"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -117,6 +129,7 @@ export function NewCycleModal({ onClose }: Props) {
 
       {/* Modal */}
       <motion.div
+        key="modal"
         initial={{ opacity: 0, scale: 0.95, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 16 }}
@@ -196,11 +209,109 @@ export function NewCycleModal({ onClose }: Props) {
               </div>
             </div>
 
+            {/* Borrow source */}
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "#8A88A0" }}>
+                  Borrow source
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: "#5E5C74" }}>
+                  Where will you draw from before your income arrives?
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setBorrowSource("emergencyFund")}
+                  className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-left"
+                  style={
+                    borrowSource === "emergencyFund"
+                      ? { background: "rgba(200,168,75,0.1)", border: "1px solid rgba(200,168,75,0.3)", color: "#DEC070" }
+                      : { background: "#131320", border: "1px solid #1E1E30", color: "#8A88A0" }
+                  }
+                >
+                  <Shield className="w-4 h-4 shrink-0" />
+                  Emergency Fund
+                </button>
+                <button
+                  onClick={() => setBorrowSource("customFund")}
+                  className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-medium transition-all text-left"
+                  style={
+                    borrowSource === "customFund"
+                      ? { background: "rgba(200,168,75,0.1)", border: "1px solid rgba(200,168,75,0.3)", color: "#DEC070" }
+                      : { background: "#131320", border: "1px solid #1E1E30", color: "#8A88A0" }
+                  }
+                >
+                  <Wallet className="w-4 h-4 shrink-0" />
+                  New Fund
+                </button>
+              </div>
+
+              <AnimatePresence>
+                {borrowSource === "customFund" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="space-y-3 overflow-hidden"
+                  >
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium" style={{ color: "#6E6C82" }}>
+                        Fund name
+                      </label>
+                      <input
+                        value={customFundName}
+                        onChange={(e) => setCustomFundName(e.target.value)}
+                        placeholder="e.g. Savings Account, Side Fund"
+                        className="w-full px-3 py-2.5 rounded-xl text-sm font-medium"
+                        style={{
+                          background: "#151520",
+                          border: "1px solid #1E1E30",
+                          color: "#EBE5D0",
+                          outline: "none",
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium" style={{ color: "#6E6C82" }}>
+                        Current balance
+                      </label>
+                      <div className="relative">
+                        <span
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium"
+                          style={{ color: "#6E6C82" }}
+                        >
+                          ₵
+                        </span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={customFundInitialBalance}
+                          onChange={(e) => setCustomFundInitialBalance(e.target.value)}
+                          className="w-full pl-6 pr-3 py-2.5 rounded-xl text-sm font-medium"
+                          style={{
+                            background: "#151520",
+                            border: "1px solid #1E1E30",
+                            color: "#EBE5D0",
+                            outline: "none",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* EF allocation */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-medium" style={{ color: "#6E6C82" }}>
-                  Emergency fund allocation
+                  {borrowSource === "customFund" && customFundName
+                    ? `${customFundName} replenishment`
+                    : "Emergency fund allocation"}
                 </label>
                 <div className="flex gap-1">
                   {(["fixed", "percent"] as const).map((type) => (
@@ -253,7 +364,9 @@ export function NewCycleModal({ onClose }: Props) {
                 )}
               </div>
               <p className="text-xs" style={{ color: "#5E5C74" }}>
-                This amount is added back to your EF when you reconcile.
+                {borrowSource === "customFund" && customFundName
+                  ? `This amount is added to your ${customFundName} when you reconcile.`
+                  : "This amount is added back to your EF when you reconcile."}
               </p>
             </div>
 
