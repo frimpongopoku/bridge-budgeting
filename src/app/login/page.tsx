@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { signInWithGoogle } from "@/lib/auth";
+import { appVersion } from "@/lib/version";
 
 export default function LoginPage() {
   const { user, loading } = useAuth();
@@ -138,15 +139,19 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <motion.p
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="text-center text-xs mt-6"
-          style={{ color: "#5E5C74" }}
+          className="text-center mt-6 space-y-1.5"
         >
-          Built for people who think ahead.
-        </motion.p>
+          <p className="text-xs" style={{ color: "#5E5C74" }}>
+            Built for people who think ahead.
+          </p>
+          <p className="text-xs font-mono" style={{ color: "#3A3850" }}>
+            v{appVersion}
+          </p>
+        </motion.div>
       </motion.div>
     </div>
   );

@@ -13,6 +13,7 @@ export interface Cycle {
   createdAt: Timestamp;
   reconciledAt?: Timestamp;
   reconciledEFBalance?: number;
+  notes?: string;
 }
 
 export interface Category {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -17,6 +17,7 @@ import { useActiveCycle } from "@/hooks/useActiveCycle";
 import { useEmergencyFund } from "@/hooks/useEmergencyFund";
 import { NewCycleModal } from "@/components/NewCycleModal";
 import { calcAllocated } from "@/lib/firestore";
+import { appVersion } from "@/lib/version";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 const fadeUp = {
@@ -57,6 +58,11 @@ export default function DashboardPage() {
   const { balance } = useEmergencyFund(user?.uid);
 
   const firstName = user?.displayName?.split(" ")[0] ?? "there";
+
+  useEffect(() => {
+    if (cycle) document.title = `${cycle.name} — Bridge`;
+    else document.title = "Bridge — Cash Flow Budgeting";
+  }, [cycle?.name]);
 
   const totalBorrowed = withdrawals.reduce((s, w) => s + w.amount, 0);
   const available = cycle ? cycle.expectedIncome - totalBorrowed : 0;
@@ -120,20 +126,25 @@ export default function DashboardPage() {
               {getGreeting()}, {firstName}
             </h1>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl"
-            style={{
-              background: "linear-gradient(135deg, #C8A84B 0%, #8B6520 100%)",
-              color: "#000",
-              boxShadow: "0 4px 20px rgba(200,168,75,0.3)",
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            New Cycle
-          </motion.button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-mono" style={{ color: "#3A3850" }}>
+              v{appVersion}
+            </span>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl"
+              style={{
+                background: "linear-gradient(135deg, #C8A84B 0%, #8B6520 100%)",
+                color: "#000",
+                boxShadow: "0 4px 20px rgba(200,168,75,0.3)",
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              New Cycle
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Loading skeleton */}

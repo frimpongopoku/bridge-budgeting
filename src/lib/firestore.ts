@@ -264,6 +264,15 @@ export async function reconcileCycle(
   await batch.commit();
 }
 
+export async function updateCycleNotes(
+  userId: string,
+  cycleId: string,
+  notes: string
+): Promise<void> {
+  const ref = doc(db, "users", userId, "cycles", cycleId);
+  await updateDoc(ref, { notes });
+}
+
 export async function updateCycleEFAllocation(
   userId: string,
   cycleId: string,

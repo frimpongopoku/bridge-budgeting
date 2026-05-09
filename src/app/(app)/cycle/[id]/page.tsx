@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -11,6 +11,7 @@ import {
   Shield,
   Pencil,
   Lock,
+  NotebookPen,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,7 @@ import {
   reconcileCycle,
   calcAllocated,
   updateCycleEFAllocation,
+  updateCycleNotes,
 } from "@/lib/firestore";
 import { AddCategoryModal } from "@/components/AddCategoryModal";
 import { deleteCategory } from "@/lib/firestore";
@@ -80,6 +82,23 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
   const [efEditType, setEfEditType] = useState<"percent" | "fixed">("fixed");
   const [efEditValue, setEfEditValue] = useState("");
   const [efEditSaving, setEfEditSaving] = useState(false);
+
+  // Notes state
+  const [notes, setNotes] = useState("");
+  const [notesSaveState, setNotesSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync notes when cycle first loads
+  useEffect(() => {
+    if (cycle) setNotes(cycle.notes ?? "");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cycle?.id]);
+
+  // Tab title
+  useEffect(() => {
+    if (cycle) document.title = `${cycle.name} — Bridge`;
+    return () => { document.title = "Bridge — Cash Flow Budgeting"; };
+  }, [cycle?.name]);
 
   const totalBorrowed = withdrawals.reduce((s, w) => s + w.amount, 0);
   const efAllocationAmount = cycle
@@ -193,6 +212,19 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
       setReconcileError("Failed to reconcile. Please try again.");
       setReconciling(false);
     }
+  }
+
+  function handleNotesChange(val: string) {
+    setNotes(val);
+    setNotesSaveState("idle");
+    if (notesTimerRef.current) clearTimeout(notesTimerRef.current);
+    notesTimerRef.current = setTimeout(async () => {
+      if (!user || !cycle) return;
+      setNotesSaveState("saving");
+      await updateCycleNotes(user.uid, cycle.id, val);
+      setNotesSaveState("saved");
+      setTimeout(() => setNotesSaveState("idle"), 2500);
+    }, 1200);
   }
 
   // Loading state
@@ -1007,6 +1039,53 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
             </div>
           </motion.div>
         </div>
+
+        {/* Notes panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+          className="rounded-2xl p-5 space-y-3"
+          style={{ background: "#0E0E1C", border: "1px solid #1A1A2C" }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{ background: "rgba(200,168,75,0.08)" }}
+              >
+                <NotebookPen className="w-4 h-4" style={{ color: "#C8A84B" }} />
+              </div>
+              <p className="text-sm font-semibold" style={{ color: "#EBE5D0" }}>
+                Cycle Notes
+              </p>
+            </div>
+            <span
+              className="text-xs transition-opacity"
+              style={{
+                color: notesSaveState === "saved" ? "#34D399" : "#706E88",
+                opacity: notesSaveState === "idle" ? 0 : 1,
+              }}
+            >
+              {notesSaveState === "saving" ? "Saving…" : "Saved"}
+            </span>
+          </div>
+          <textarea
+            value={notes}
+            onChange={(e) => handleNotesChange(e.target.value)}
+            placeholder="Capture your thoughts, context, or state of mind for this cycle…"
+            rows={4}
+            className="w-full px-3 py-2.5 rounded-xl text-sm resize-none placeholder-[#4A4860] leading-relaxed"
+            style={{
+              background: "#0B0B16",
+              border: "1px solid #1A1A2C",
+              color: "#C5C0D0",
+              outline: "none",
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(200,168,75,0.3)"; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "#1A1A2C"; }}
+          />
+        </motion.div>
       </div>
     </>
   );
