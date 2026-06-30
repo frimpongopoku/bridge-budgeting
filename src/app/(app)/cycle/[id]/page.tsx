@@ -101,6 +101,11 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
   }, [cycle?.name]);
 
   const totalBorrowed = withdrawals.reduce((s, w) => s + w.amount, 0);
+  const totalAllocated = categories.reduce(
+    (s, cat) => s + calcAllocated(cycle?.expectedIncome ?? 0, cat.allocationType, cat.allocationValue),
+    0
+  );
+  const totalRemaining = totalAllocated - totalBorrowed;
   const efAllocationAmount = cycle
     ? calcAllocated(cycle.expectedIncome, cycle.emergencyFundAllocationType, cycle.emergencyFundAllocationValue)
     : 0;
@@ -232,8 +237,8 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
     return (
       <div className="p-8 max-w-7xl mx-auto space-y-8">
         <SkeletonBlock className="h-12 w-80" />
-        <div className="grid grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => <SkeletonBlock key={i} className="h-20" />)}
+        <div className="grid grid-cols-5 gap-4">
+          {[1, 2, 3, 4, 5].map((i) => <SkeletonBlock key={i} className="h-20" />)}
         </div>
         <div className="grid grid-cols-5 gap-6">
           <div className="col-span-3 space-y-3">
@@ -479,7 +484,7 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.06 }}
-          className="grid grid-cols-4 gap-4"
+          className="grid grid-cols-5 gap-4"
         >
           {[
             {
@@ -496,6 +501,11 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
               label: isCustomFund ? `${fundName} Balance` : "EF Balance",
               value: isCustomFund ? `₵${currentFundBalance.toLocaleString()}` : (balance !== null ? `₵${balance.toLocaleString()}` : "–"),
               color: "#34D399",
+            },
+            {
+              label: "Left to Consume",
+              value: categories.length > 0 ? `${totalRemaining < 0 ? "–" : "+"}₵${Math.abs(totalRemaining).toLocaleString()}` : "–",
+              color: totalRemaining < 0 ? "#F87171" : "#C8A84B",
             },
           ].map((s) => (
             <motion.div
