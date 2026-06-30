@@ -101,6 +101,10 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
   }, [cycle?.name]);
 
   const totalBorrowed = withdrawals.reduce((s, w) => s + w.amount, 0);
+  const totalAllocated = categories.reduce(
+    (s, cat) => s + calcAllocated(cycle?.expectedIncome ?? 0, cat.allocationType, cat.allocationValue),
+    0
+  );
   const categoryRemainingSum = categories.reduce((s, cat) => {
     const alloc = calcAllocated(cycle?.expectedIncome ?? 0, cat.allocationType, cat.allocationValue);
     const spent = withdrawals.filter((w) => w.categoryId === cat.id).reduce((a, w) => a + w.amount, 0);
@@ -486,41 +490,31 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
           transition={{ duration: 0.4, delay: 0.06 }}
           className="grid grid-cols-5 gap-4"
         >
-          {[
-            {
-              label: "Expected Income",
-              value: `₵${cycle.expectedIncome.toLocaleString()}`,
-              color: "#EBE5D0",
-            },
-            {
-              label: "Total Borrowed",
-              value: `₵${totalBorrowed.toLocaleString()}`,
-              color: "#E8A838",
-            },
-            {
-              label: isCustomFund ? `${fundName} Balance` : "EF Balance",
-              value: isCustomFund ? `₵${currentFundBalance.toLocaleString()}` : (balance !== null ? `₵${balance.toLocaleString()}` : "–"),
-              color: "#34D399",
-            },
-          ].map((s) => (
-            <motion.div
-              key={s.label}
-              whileHover={{ y: -1 }}
-              className="rounded-2xl p-4 transition-colors"
-              style={{ background: "#0E0E1C", border: "1px solid #1A1A2C" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#252538"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#1A1A2C"; }}
-            >
-              <p className="text-xs font-medium mb-1" style={{ color: "#8A88A0" }}>
-                {s.label}
-              </p>
-              <p className="text-xl font-bold" style={{ color: s.color }}>
-                {s.value}
-              </p>
-            </motion.div>
-          ))}
+          {/* Expected Income */}
+          <motion.div
+            whileHover={{ y: -1 }}
+            className="rounded-2xl p-4 transition-colors"
+            style={{ background: "#0E0E1C", border: "1px solid #1A1A2C" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#252538"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#1A1A2C"; }}
+          >
+            <p className="text-xs font-medium mb-1" style={{ color: "#8A88A0" }}>Expected Income</p>
+            <p className="text-xl font-bold" style={{ color: "#EBE5D0" }}>₵{cycle.expectedIncome.toLocaleString()}</p>
+          </motion.div>
 
-          {/* Left to Consume — two numbers */}
+          {/* Total Borrowed */}
+          <motion.div
+            whileHover={{ y: -1 }}
+            className="rounded-2xl p-4 transition-colors"
+            style={{ background: "#0E0E1C", border: "1px solid #1A1A2C" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#252538"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#1A1A2C"; }}
+          >
+            <p className="text-xs font-medium mb-1" style={{ color: "#8A88A0" }}>Total Borrowed</p>
+            <p className="text-xl font-bold" style={{ color: "#E8A838" }}>₵{totalBorrowed.toLocaleString()}</p>
+          </motion.div>
+
+          {/* Left to Consume */}
           <motion.div
             whileHover={{ y: -1 }}
             className="rounded-2xl p-4 transition-colors"
@@ -534,7 +528,21 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
             </p>
           </motion.div>
 
-          {/* EF balance — snapshot when reconciled, projection when active */}
+          {/* EF Balance */}
+          <motion.div
+            whileHover={{ y: -1 }}
+            className="rounded-2xl p-4 transition-colors"
+            style={{ background: "#0E0E1C", border: "1px solid #1A1A2C" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#252538"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#1A1A2C"; }}
+          >
+            <p className="text-xs font-medium mb-1" style={{ color: "#8A88A0" }}>{isCustomFund ? `${fundName} Balance` : "EF Balance"}</p>
+            <p className="text-xl font-bold" style={{ color: "#34D399" }}>
+              {isCustomFund ? `₵${currentFundBalance.toLocaleString()}` : (balance !== null ? `₵${balance.toLocaleString()}` : "–")}
+            </p>
+          </motion.div>
+
+          {/* After Reconciliation — snapshot when reconciled, projection when active */}
           <motion.div
             whileHover={{ y: -1 }}
             className="rounded-2xl p-4 relative overflow-hidden"
@@ -730,6 +738,27 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
                 })
               )}
             </motion.div>
+
+            {/* Category budget summary */}
+            {categories.length > 0 && (
+              <div
+                className="rounded-2xl px-5 py-3.5 flex items-center justify-between"
+                style={{ background: "#0B0B16", border: "1px solid #1A1A2C" }}
+              >
+                <span className="text-xs font-medium" style={{ color: "#8A88A0" }}>
+                  Category budget total
+                </span>
+                <div className="flex items-center gap-3 text-xs font-semibold">
+                  <span style={{ color: "#E8A838" }}>₵{totalBorrowed.toLocaleString()} borrowed</span>
+                  <span style={{ color: "#706E88" }}>+</span>
+                  <span style={{ color: categoryRemainingSum < 0 ? "#F87171" : "#C8A84B" }}>
+                    ₵{Math.abs(categoryRemainingSum).toLocaleString()} left
+                  </span>
+                  <span style={{ color: "#706E88" }}>=</span>
+                  <span style={{ color: "#EBE5D0" }}>₵{totalAllocated.toLocaleString()}</span>
+                </div>
+              </div>
+            )}
 
             {/* Emergency fund allocation card */}
             <motion.div
