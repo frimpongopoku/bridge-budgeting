@@ -101,11 +101,6 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
   }, [cycle?.name]);
 
   const totalBorrowed = withdrawals.reduce((s, w) => s + w.amount, 0);
-  const totalAllocated = categories.reduce(
-    (s, cat) => s + calcAllocated(cycle?.expectedIncome ?? 0, cat.allocationType, cat.allocationValue),
-    0
-  );
-  const totalRemaining = totalAllocated - totalBorrowed;
   const categoryRemainingSum = categories.reduce((s, cat) => {
     const alloc = calcAllocated(cycle?.expectedIncome ?? 0, cat.allocationType, cat.allocationValue);
     const spent = withdrawals.filter((w) => w.categoryId === cat.id).reduce((a, w) => a + w.amount, 0);
@@ -528,24 +523,15 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
           {/* Left to Consume — two numbers */}
           <motion.div
             whileHover={{ y: -1 }}
-            className="rounded-2xl p-4 transition-colors space-y-3"
+            className="rounded-2xl p-4 transition-colors"
             style={{ background: "#0E0E1C", border: "1px solid #1A1A2C" }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#252538"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#1A1A2C"; }}
           >
-            <p className="text-xs font-medium" style={{ color: "#8A88A0" }}>Left to Consume</p>
-            <div>
-              <p className="text-xl font-bold" style={{ color: totalRemaining < 0 ? "#F87171" : "#C8A84B" }}>
-                {categories.length > 0 ? `${totalRemaining < 0 ? "–" : ""}₵${Math.abs(totalRemaining).toLocaleString()}` : "–"}
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: "#706E88" }}>of ₵{totalAllocated.toLocaleString()} allocated</p>
-            </div>
-            <div style={{ borderTop: "1px solid #1A1A2C", paddingTop: "10px" }}>
-              <p className="text-base font-semibold" style={{ color: categoryRemainingSum < 0 ? "#F87171" : "#C5C0D0" }}>
-                {categories.length > 0 ? `${categoryRemainingSum < 0 ? "–" : ""}₵${Math.abs(categoryRemainingSum).toLocaleString()}` : "–"}
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: "#706E88" }}>sum of {categories.length} {categories.length === 1 ? "category" : "categories"}</p>
-            </div>
+            <p className="text-xs font-medium mb-1" style={{ color: "#8A88A0" }}>Left to Consume</p>
+            <p className="text-xl font-bold" style={{ color: categoryRemainingSum < 0 ? "#F87171" : "#C8A84B" }}>
+              {categories.length > 0 ? `${categoryRemainingSum < 0 ? "–" : ""}₵${Math.abs(categoryRemainingSum).toLocaleString()}` : "–"}
+            </p>
           </motion.div>
 
           {/* EF balance — snapshot when reconciled, projection when active */}
