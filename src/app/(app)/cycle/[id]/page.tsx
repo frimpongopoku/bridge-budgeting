@@ -77,9 +77,6 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
   const [deletingWithdrawalId, setDeletingWithdrawalId] = useState<string | null>(null);
   const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
 
-  // Left to Consume hover state
-  const [showRemainderBreakdown, setShowRemainderBreakdown] = useState(false);
-
   // EF replenishment edit state
   const [editingEF, setEditingEF] = useState(false);
   const [efEditType, setEfEditType] = useState<"percent" | "fixed">("fixed");
@@ -109,6 +106,11 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
     0
   );
   const totalRemaining = totalAllocated - totalBorrowed;
+  const categoryRemainingSum = categories.reduce((s, cat) => {
+    const alloc = calcAllocated(cycle?.expectedIncome ?? 0, cat.allocationType, cat.allocationValue);
+    const spent = withdrawals.filter((w) => w.categoryId === cat.id).reduce((a, w) => a + w.amount, 0);
+    return s + (alloc - spent);
+  }, 0);
   const efAllocationAmount = cycle
     ? calcAllocated(cycle.expectedIncome, cycle.emergencyFundAllocationType, cycle.emergencyFundAllocationValue)
     : 0;
@@ -523,60 +525,27 @@ export default function CyclePage({ params }: { params: Promise<{ id: string }> 
             </motion.div>
           ))}
 
-          {/* Left to Consume — with per-category hover breakdown */}
+          {/* Left to Consume — two numbers */}
           <motion.div
             whileHover={{ y: -1 }}
-            className="rounded-2xl p-4 transition-colors"
+            className="rounded-2xl p-4 transition-colors space-y-3"
             style={{ background: "#0E0E1C", border: "1px solid #1A1A2C" }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#252538"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#1A1A2C"; }}
           >
-            <p className="text-xs font-medium mb-1" style={{ color: "#8A88A0" }}>
-              Left to Consume
-            </p>
-            <p className="text-xl font-bold" style={{ color: totalRemaining < 0 ? "#F87171" : "#C8A84B" }}>
-              {categories.length > 0 ? `${totalRemaining < 0 ? "–" : "+"}₵${Math.abs(totalRemaining).toLocaleString()}` : "–"}
-            </p>
-            {categories.length > 0 && (
-              <div className="relative mt-1.5">
-                <p
-                  className="text-xs cursor-default underline decoration-dotted"
-                  style={{ color: "#706E88", textUnderlineOffset: "3px" }}
-                  onMouseEnter={() => setShowRemainderBreakdown(true)}
-                  onMouseLeave={() => setShowRemainderBreakdown(false)}
-                >
-                  across {categories.length} {categories.length === 1 ? "category" : "categories"}
-                </p>
-                {showRemainderBreakdown && (
-                  <div
-                    className="absolute bottom-full left-0 mb-2 z-50 rounded-xl p-3 space-y-2 min-w-[200px]"
-                    style={{ background: "#0B0B16", border: "1px solid #1E1E2C", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}
-                    onMouseEnter={() => setShowRemainderBreakdown(true)}
-                    onMouseLeave={() => setShowRemainderBreakdown(false)}
-                  >
-                    <p className="text-xs font-semibold mb-2" style={{ color: "#8A88A0" }}>Per-category remaining</p>
-                    {categories.map((cat) => {
-                      const catAllocated = calcAllocated(cycle.expectedIncome, cat.allocationType, cat.allocationValue);
-                      const catSpent = withdrawals.filter((w) => w.categoryId === cat.id).reduce((s, w) => s + w.amount, 0);
-                      const catRemaining = catAllocated - catSpent;
-                      return (
-                        <div key={cat.id} className="flex items-center justify-between gap-4">
-                          <span className="text-xs truncate" style={{ color: "#C5C0D0" }}>
-                            {cat.emoji} {cat.name}
-                          </span>
-                          <span
-                            className="text-xs font-semibold shrink-0"
-                            style={{ color: catRemaining < 0 ? "#F87171" : "#34D399" }}
-                          >
-                            {catRemaining < 0 ? "–" : "+"}₵{Math.abs(catRemaining).toLocaleString()}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
+            <p className="text-xs font-medium" style={{ color: "#8A88A0" }}>Left to Consume</p>
+            <div>
+              <p className="text-xl font-bold" style={{ color: totalRemaining < 0 ? "#F87171" : "#C8A84B" }}>
+                {categories.length > 0 ? `${totalRemaining < 0 ? "–" : ""}₵${Math.abs(totalRemaining).toLocaleString()}` : "–"}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "#706E88" }}>of ₵{totalAllocated.toLocaleString()} allocated</p>
+            </div>
+            <div style={{ borderTop: "1px solid #1A1A2C", paddingTop: "10px" }}>
+              <p className="text-base font-semibold" style={{ color: categoryRemainingSum < 0 ? "#F87171" : "#C5C0D0" }}>
+                {categories.length > 0 ? `${categoryRemainingSum < 0 ? "–" : ""}₵${Math.abs(categoryRemainingSum).toLocaleString()}` : "–"}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "#706E88" }}>sum of {categories.length} {categories.length === 1 ? "category" : "categories"}</p>
+            </div>
           </motion.div>
 
           {/* EF balance — snapshot when reconciled, projection when active */}
